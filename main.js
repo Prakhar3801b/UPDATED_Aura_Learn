@@ -16,7 +16,7 @@ import {
 
 // Firebase config
 const firebaseConfig = {
-    apiKey: "AIzaSyA2cEQ6vs4qIrJh0RCNU0SihBHj4h3c5Gw",
+    apiKey: "Put your own API Key here, (have to hide mine for obvious reasons)",
     authDomain: "https://auralearn-fee1e.firebaseapp.com/",
     projectId: "auralearn-fee1e",
     appId: "1:349344565700:web:cef46ac07bccf77d083c91"
@@ -200,3 +200,4 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
