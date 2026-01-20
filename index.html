@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura_Learn | Virtual Lab Assistant</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Google Fonts for a "VSCode-like" feel -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&family=Inter:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Socket.IO -->
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <!-- Three.js (for AR/VR) -->
+    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.150.1/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.150.1/examples/jsm/"
+        }
+      }
+    </script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-1PNFSHTQTR"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-1PNFSHTQTR');
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+
+</head>
+
+<body>
+
+    <!-- Particle Background -->
+    <div id="vanta-canvas"></div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="logo">
+            <span class="logo-icon"><span class="material-icons">data_object</span></span>
+            <span class="logo-text">Aura_Learn</span>
+        </div>
+        <div class="nav-links">
+            <button id="dashboard-btn" class="nav-btn hidden">Dashboard</button>
+            <button id="login-btn" class="nav-btn login-btn">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google"
+                    class="google-icon">
+                Login
+            </button>
+            <button id="logout-btn" class="nav-btn hidden">Logout</button>
+
+        </div>
+    </nav>
+
+
+
+
+
+    <!-- Main Container -->
+    <main id="app-container">
+
+        <!-- LANDING PAGE SECTION -->
+        <section id="landing-section" class="active-section">
+            <div class="hero-content">
+                <h1 class="main-title">Aura_Learn</h1>
+                <p class="subtitle">AI-Powered Virtual Laboratory Assistant</p>
+                <button id="experiments-btn" class="cta-btn">
+                    Explore Experiments <span class="material-icons">arrow_forward</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- EXPERIMENT SELECTION SECTION -->
+        <section id="selection-section" class="hidden-section">
+            <h2 class="section-title">Select Your Domain</h2>
+            <div class="cards-container">
+                <div class="card" data-domain="physics">
+                    <div class="card-icon"><span class="material-icons">bolt</span></div>
+                    <h3>Physics</h3>
+                    <p>Mechanics, Optics, and Waves</p>
+                </div>
+                <div class="card" data-domain="chemistry">
+                    <div class="card-icon"><span class="material-icons">science</span></div>
+                    <h3>Chemistry</h3>
+                    <p>Reactions, Elements, and Bonding</p>
+                </div>
+                <div class="card" data-domain="biology">
+                    <div class="card-icon"><span class="material-icons">biotech</span></div>
+                    <h3>Biology</h3>
+                    <p>Anatomy, Cells, and Life</p>
+                </div>
+            </div>
+            <button id="back-to-landing" class="back-btn"><span class="material-icons">arrow_back</span> Back</button>
+        </section>
+
+        <!-- AR/VR EXPERIMENT SECTION -->
+        <section id="ar-section" class="hidden-section">
+            <div id="ar-view-container">
+                <!-- Three.js / WebXR Canvas will be injected here -->
+                <div id="ar-start-overlay">
+                    <button id="start-ar-btn" class="cta-btn safe-btn">
+                        <span class="material-icons">videocam</span> Start AR Experience
+                    </button>
+                    <p class="ar-instruction">Click to enable camera access for this experiment</p>
+                </div>
+            </div>
+
+            <!-- AI UI Overlay -->
+            <div id="ai-overlay">
+                <div class="overlay-header">
+                    <span id="experiment-title">Physics Experiment</span>
+                    <button id="exit-ar-btn" class="icon-btn"><span class="material-icons">close</span></button>
+                </div>
+
+                <div class="highlight-overlay">
+                    <!-- Dynamic SVG/Divs for object highlighting will go here -->
+                </div>
+
+                <div class="info-panel">
+                    <div id="ai-message-box">
+                        <h4 class="step-title">Step 1: Calibration</h4>
+                        <p class="step-desc">Please point your camera at the apparatus.</p>
+                        <div id="equation-display" class="equation-box hidden"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODE SELECTION MODAL -->
+    <div id="mode-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 class="section-title">Select Experience Mode</h2>
+            <p style="margin-bottom: 2rem; color: #a0a0a0;">Choose how you want to explore this experiment.</p>
+
+            <div class="mode-options">
+                <!-- AR Mode -->
+                <div class="mode-card" id="mode-ar">
+                    <span class="material-icons mode-icon">view_in_ar</span>
+                    <h3>AR Experience</h3>
+                    <p>Augmented Reality via Camera + AI Analysis</p>
+                </div>
+
+                <!-- VR Mode -->
+                <div class="mode-card" id="mode-vr">
+                    <span class="material-icons mode-icon">vrpano</span>
+                    <h3>VR Laboratory</h3>
+                    <p>Immersive 3D Virtual Physics Environment</p>
+                </div>
+            </div>
+
+            <button id="close-modal-btn" class="back-btn" style="margin-top: 2rem;">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Three.js (Global for Vanta) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <!-- Vanta.js -->
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.globe.min.js"></script>
+    <script src="js/particles.js"></script>
+    <script src="js/ar_core.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

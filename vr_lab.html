@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura_Learn | VR Lab</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+        }
+
+        #vr-ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        #exit-vr {
+            pointer-events: auto;
+            background: rgba(255, 0, 0, 0.5);
+            border: 1px solid red;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="vr-ui">
+        <h1 id="lab-title">Physics VR Lab</h1>
+        <p>Use Mouse to Look Around. WASD to Move (Simulated).</p>
+        <button id="exit-vr">Exit VR</button>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three@0.150.1/build/three.module.js';
+
+        // Get Domain
+        const params = new URLSearchParams(window.location.search);
+        const domain = params.get('experiment') || 'physics';
+        document.getElementById('lab-title').innerText = domain.charAt(0).toUpperCase() + domain.slice(1) + " VR Lab";
+
+        document.getElementById('exit-vr').onclick = () => {
+            window.location.href = 'index.html';
+        };
+
+        // Scene Setup
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x101010);
+        scene.fog = new THREE.Fog(0x101010, 10, 50);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 1.6, 5); // Eye level
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0x404040, 2);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+        dirLight.position.set(5, 10, 7);
+        scene.add(dirLight);
+
+        // Floor (Grid)
+        const gridHelper = new THREE.GridHelper(50, 50, 0x444444, 0x222222);
+        scene.add(gridHelper);
+
+        const floorGeo = new THREE.PlaneGeometry(50, 50);
+        const floorMat = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.8 });
+        const floor = new THREE.Mesh(floorGeo, floorMat);
+        floor.rotation.x = -Math.PI / 2;
+        floor.position.y = -0.01;
+        scene.add(floor);
+
+        // Lab Bench
+        const benchGeo = new THREE.BoxGeometry(4, 1, 2);
+        const benchMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+        const bench = new THREE.Mesh(benchGeo, benchMat);
+        bench.position.set(0, 0.5, 0);
+        scene.add(bench);
+
+        // Experiment Objects (Based on domain)
+        const objGeo = new THREE.SphereGeometry(0.3, 32, 32);
+        let objColor = 0x007acc;
+
+        if (domain === 'chemistry') objColor = 0xff5500;
+        if (domain === 'biology') objColor = 0x00ff55;
+
+        const objMat = new THREE.MeshStandardMaterial({
+            color: objColor,
+            emissive: objColor,
+            emissiveIntensity: 0.5,
+            roughness: 0.1,
+            metalness: 0.5
+        });
+
+        const obj = new THREE.Mesh(objGeo, objMat);
+        obj.position.set(0, 1.3, 0);
+        scene.add(obj);
+
+        // Floating Particles
+        const partGeo = new THREE.BufferGeometry();
+        const partCount = 500;
+        const posArray = new Float32Array(partCount * 3);
+
+        for (let i = 0; i < partCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 20;
+        }
+
+        partGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const partMat = new THREE.PointsMaterial({ size: 0.05, color: objColor, transparent: true, opacity: 0.6 });
+        const particles = new THREE.Points(partGeo, partMat);
+        scene.add(particles);
+
+        // Animation
+        function animate() {
+            requestAnimationFrame(animate);
+
+            obj.position.y = 1.3 + Math.sin(Date.now() * 0.002) * 0.1;
+            obj.rotation.y += 0.01;
+
+            particles.rotation.y += 0.001;
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+
+</html>
